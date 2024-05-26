@@ -1,0 +1,59 @@
+integrations:
+- integration_type: git_repo
+  git_repo: mosaicml/llm-foundry
+  git_branch: v0.5.0
+  # git_commit: # OR use your commit hash
+  pip_install: -e .[gpu]
+  ssh_clone: false  # Should be true if using a private repo
+
+command: |
+  cd llm-foundry/scripts/
+  composer eval/eval.py /mnt/config/parameters.yaml
+image: mosaicml/llm-foundry:2.1.0_cu121_flash2-latest
+name: mpt-1b-eval
+
+compute:
+  gpus: 8  # Number of GPUs to use
+  ## These configurations are optional
+  # cluster: TODO # Name of the cluster to use for this run
+  # gpu_type: a100_80gb # Type of GPU to use. We use a100_80gb in our experiments
+
+# The below is injected as a YAML file: /mnt/config/parameters.yaml
+parameters:
+  run_name:  # If left blank, will be read from top YAML name for W&B logging and checkpointing
+  seed: 1
+  max_seq_len: 1024
+
+  models:
+  -
+    model_name: mpt1b
+    tokenizer:
+      name: EleutherAI/gpt-neox-20b
+      kwargs:
+        model_max_length: ${max_seq_len}
+    model:
+      name: mpt_causal_lm
+      init_device: mixed
+      d_model: 2048
+      n_heads: 16  # Modified 24->16 so that d_head == 128 to satisfy FlashAttention
+      n_layers: 24
+      expansion_ratio: 4
+      max_seq_len: ${max_seq_len}
+      vocab_size: 50368
+      attn_config:
+        attn_impl: triton
+
+    load_path:  # Add your (non-optional) Composer checkpoint path here!
+
+  device_eval_batch_size: 4
+  precision: amp_fp16
+
+  # FSDP config for model sharding
+  fsdp_config:
+    sharding_strategy: FULL_SHARD
+    mixed_precision: FULL
+    forward_prefetch: True
+    limit_all_gathers: True
+
+  icl_tasks: "eval/yamls/tasks_v0.2.yaml"
+  eval_gauntlet: "eval/yamls/eval_gauntlet_v0.2.yaml"

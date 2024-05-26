@@ -1,0 +1,155 @@
+data_local: /mnt/beegfs/alistgrp/mnikdan/c4
+data_remote:  # If blank, files must be present in data_local
+max_seq_len: 2048
+global_seed: 17
+
+# Model - ok
+model:
+  name: mpt_causal_lm
+  init_device: meta
+  d_model: 768
+  n_heads: 12
+  n_layers: 12
+  expansion_ratio: 4
+  max_seq_len: ${max_seq_len}
+  vocab_size: 50368
+  attn_config:
+    attn_impl: flash #torch # triton
+
+# Tokenizer - ok
+tokenizer:
+  name: EleutherAI/gpt-neox-20b
+  kwargs:
+    model_max_length: ${max_seq_len}
+
+# Dataloaders - ok
+train_loader:
+  name: text
+  dataset:
+    local: ${data_local}
+    remote: ${data_remote}
+    split: train
+    shuffle: true
+    max_seq_len: ${max_seq_len}
+    shuffle_seed: ${global_seed}
+  drop_last: true
+  num_workers: 8
+
+eval_loader:
+  name: text
+  dataset:
+    local: ${data_local}
+    remote: ${data_remote}
+    split: val
+    shuffle: false
+    max_seq_len: ${max_seq_len}
+    shuffle_seed: ${global_seed}
+  drop_last: false
+  num_workers: 8
+
+# Optimization
+scheduler:
+  name: cosine_with_warmup
+  t_warmup: 100ba
+  alpha_f: 0.1
+
+algorithms:
+  gradient_clipping:
+    clipping_type: norm
+    clipping_threshold: 1.0
+
+max_duration: 4800ba  # ~ 2.5B tokens
+eval_interval: 500ba
+eval_first: false
+eval_subset_num_batches: -1
+global_train_batch_size: 256
+
+# System
+seed: ${global_seed}
+device_eval_batch_size: 16
+device_train_microbatch_size: 16
+# device_train_microbatch_size: auto
+precision: amp_bf16
+
+# FSDP
+#fsdp_config:
+#  sharding_strategy: FULL_SHARD
+#  mixed_precision: PURE
+#  activation_checkpointing: false
+#  activation_checkpointing_reentrant: false
+#  activation_cpu_offload: false
+#  limit_all_gathers: true
+
+# Logging - ok
+progress_bar: true
+log_to_console: true
+console_log_interval: 1ba
+
+callbacks:
+  speed_monitor:
+    window_size: 10
+  lr_monitor: {}
+  memory_monitor: {}
+  runtime_estimator: {}
+
+#optimizer:
+#  name: decoupled_adamw
+#  lr: 6e-4
+#  betas:
+#  - 0.9
+#  - 0.95
+#  eps: 1e-8
+#  weight_decay: 0.0
+
+optimizer:
+  name: cadam
+  lr: 6e-4
+  betas:
+  - 0.9
+  - 0.95
+  eps: 1e-8
+  weight_decay: 0
+  exclude_layers: [ ]
+  use_bf16: 0
+  m: 10
+  k_init: 0.01
+  quant_bits: 4
+  quant_block_size: 64
+
+#optimizer:
+#  name: kgmfac
+#  lr: 5e-3
+#  damp: 1e-4
+#  weight_decay: 0.01
+#  ngrads: 1024
+#  use_bf16: 0
+#  k_init: 0.01
+
+loggers:
+  wandb:
+    entity: ist
+    project: ionut_llm_foundry
+    # project: ionut_pretrain_c4-small
+    ### AdamW below
+    # name: mpt125m_${optimizer.name}_lr=${optimizer.lr}_wd=${optimizer.weight_decay}
+    ### Compressed AdamW below
+    name: mpt125m_${optimizer.name}_lr=${optimizer.lr}_wd=${optimizer.weight_decay}_m=${optimizer.m}_k=${optimizer.k_init}_bf16=${optimizer.use_bf16}_qb=${optimizer.quant_bits}_qbs=${optimizer.quant_block_size}
+    ### SparseMFAC below
+    # name: mpt125m_${optimizer.name}_lr=${optimizer.lr}_d=${optimizer.damp}_wd=${optimizer.weight_decay}_k=${optimizer.k_init}_m=${optimizer.ngrads}_bf16=${optimizer.use_bf16}
+
+# Run Name
+run_name: ${loggers.wandb.name} # If left blank, will be read from env var $RUN_NAME
+
+# Checkpoint to local filesystem or remote object store
+# save_interval: 500ba
+save_num_checkpoints_to_keep: 1  # Important, this cleans up checkpoints saved to DISK
+save_folder: /mnt/beegfs/alistgrp/imodoran/results/ionut_llm_foundry/${run_name}/
+# save_folder: s3://my-bucket/my-folder/{run_name}/checkpoints
+
+# Load from local filesystem or remote object store
+# load_path: ./gpt-125m/checkpoints/latest-rank{rank}.pt
+# load_path: s3://my-bucket/my-folder/gpt-125m/checkpoints/latest-rank{rank}.pt
+
+# CUDA_VISIBLE_DEVICES=0,1,2,3 composer scripts/train/train.py scripts/train/yamls/pretrain/mpt-125m.yaml
+# CUDA_VISIBLE_DEVICES=4,5,6,7 composer scripts/train/train.py scripts/train/yamls/pretrain/mpt-125m.yaml
+# export LD_LIBRARY_PATH=/nfs/scistore19/alistgrp/imodoran/miniconda3/envs/llm_foundry/lib/

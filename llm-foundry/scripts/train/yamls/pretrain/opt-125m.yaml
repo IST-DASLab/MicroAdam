@@ -1,0 +1,133 @@
+data_local: /mnt/beegfs/alistgrp/imodoran/datasets/c4-4096-llama2-70b-hf
+data_remote: # If blank, files must be present in data_local
+model_name_or_path: /mnt/beegfs/alistgrp/imodoran/models/llama2-125m-reset
+
+max_seq_len: 4096
+tokenizer_name: EleutherAI/gpt-neox-20b # meta-llama/Llama-2-70b-hf
+#tokenizer_name: /nfs/scistore19/alistgrp/huggingface/hub/models--meta-llama--Llama-2-70b-hf
+
+# System
+seed: 0
+device_eval_batch_size: 4
+device_train_microbatch_size: 4
+precision: amp_bf16
+device: gpu
+dist_timeout: 72000
+max_duration: 4800ba  # ~ 5B tokens = max_duration(=4800) * global_train_batch_size(=256) * max_seq_len(=256)
+eval_interval: 500ba
+eval_first: false
+eval_subset_num_batches: -1
+global_train_batch_size: 256
+
+# Tokenizer
+tokenizer:
+  name: ${tokenizer_name}
+  kwargs:
+    model_max_length: ${max_seq_len}
+
+# Model
+model:
+  name: hf_causal_lm
+  pretrained_model_name_or_path: ${model_name_or_path}
+  pretrained: false
+  max_seq_len: ${max_seq_len}
+  output_hidden_states: true
+  tokenizer_name: ${tokenizer_name}
+#  vocab_size: 50277
+#  allow_embedding_resizing: true
+
+# Dataloaders
+train_loader:
+  name: text
+  dataset:
+    local: ${data_local}
+    remote: ${data_remote}
+    split: train
+    max_seq_len: ${max_seq_len}
+    shuffle: true
+  drop_last: true
+  num_workers: 8
+
+eval_loader:
+  name: text
+  dataset:
+    local: ${data_local}
+    remote: ${data_remote}
+    split: val
+    max_seq_len: ${max_seq_len}
+    shuffle: false
+    shuffle_seed: ${seed}
+  drop_last: false
+  num_workers: 8
+
+# Logging
+progress_bar: true
+log_to_console: true
+console_log_interval: 1ba
+
+callbacks:
+  speed_monitor:
+    window_size: 500
+  lr_monitor: {}
+  memory_monitor: {}
+  runtime_estimator: {}
+
+# Optimization
+scheduler:
+  name: cosine_with_warmup
+  t_warmup: 0.01dur
+  alpha_f: 0.1 # Linearly decay to 0.1x the full LR by the end of the training duration
+
+optimizer:
+  name: decoupled_adamw
+  lr: 6e-4
+  betas:
+  - 0.9
+  - 0.95
+  eps: 1e-8
+  weight_decay: 0
+
+#optimizer:
+#  name: cadam
+#  lr: 1e-4
+#  betas:
+#  - 0.9
+#  - 0.95
+#  eps: 1e-8
+#  weight_decay: 0.0
+#  exclude_layers: [ ]
+#  use_bf16: 1
+#  m: 10
+#  k_init: 0.01
+#  quant_bits: 4
+#  quant_block_size: 64
+
+algorithms:
+  gradient_clipping:
+    clipping_type: norm
+    clipping_threshold: 1.0
+
+# (Optional) W&B logging
+loggers:
+  wandb:
+    entity: ist
+    project: ionut_llm_foundry
+    ### AdamW below
+    name: opt125m-msl=${max_seq_len}_${optimizer.name}_lr=${optimizer.lr}_wd=${optimizer.weight_decay}
+    ### Compressed AdamW below
+    # name: opt125m-msl=${max_seq_len}_{optimizer.name}_lr=${optimizer.lr}_wd=${optimizer.weight_decay}_m=${optimizer.m}_k=${optimizer.k_init}_bf16=${optimizer.use_bf16}_qb=${optimizer.quant_bits}_qbs=${optimizer.quant_block_size}
+    ### SparseMFAC below
+    # name: opt125m-msl=${max_seq_len}_{optimizer.name}_lr=${optimizer.lr}_d=${optimizer.damp}_wd=${optimizer.weight_decay}_k=${optimizer.k_init}_m=${optimizer.ngrads}_bf16=${optimizer.use_bf16}
+
+
+# Run Name
+run_name: ${loggers.wandb.name} # If left blank, will be read from env var $RUN_NAME
+
+# save_interval: 10000ba
+save_num_checkpoints_to_keep: 1  # Important, this cleans up checkpoints saved to DISK
+save_folder: /mnt/beegfs/alistgrp/imodoran/results/ionut_llm_foundry/${run_name}/
+
+# CUDA_VISIBLE_DEVICES=0,1,2,3 composer scripts/train/train.py scripts/train/yamls/pretrain/opt-125m.yaml
+# CUDA_VISIBLE_DEVICES=4,5,6,7 composer scripts/train/train.py scripts/train/yamls/pretrain/opt-125m.yaml
+# py scripts/data_prep/convert_dataset_hf.py --dataset c4 --data_subset en --out_root /mnt/beegfs/alistgrp/imodoran/datasets/c4-4096 --splits train val --concat_tokens 4096 --tokenizer EleutherAI/gpt-neox-20b --eos_text '<|endoftext|>'
+# py scripts/data_prep/convert_dataset_hf.py --dataset c4 --data_subset en --out_root /mnt/beegfs/alistgrp/imodoran/datasets/c4-4096 --splits train val --concat_tokens 4096 --tokenizer meta-llama/Llama-2-70b-hf --eos_text '<|endoftext|>'
