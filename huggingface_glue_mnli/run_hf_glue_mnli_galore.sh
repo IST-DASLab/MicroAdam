@@ -2,20 +2,19 @@ clear
 MODEL=bert-base # bert-base OR bert-large OR opt-1.3b
 OUTPUT_DIR=./results_hf_glue_mnli
 
+OPTIMIZER=galoreadamwef
+
 WANDB_PROJECT=microadam
 WANDB_GROUP=huggingface
 WANDB_JOB_TYPE=glue_mnli
-WANDB_NAME=test
+WANDB_NAME=${OPTIMIZER}
 
 SEED=42
 LR=4e-5 # use --lr to set learning rate and let learning_rate set to 1e-4 (the last one will be ignored)
-QUANT_BLOCK_SIZE=100000
-NGRADS=10
-DENSITY=0.01 # percentage, 0.01 means 1%
 
 CUDA_VISIBLE_DEVICES=0 python glue.py \
     --num_train_epochs 3 \
-    --optimizer_name microadam \
+    --optimizer_name ${OPTIMIZER} \
     --logging_strategy steps \
     --logging_steps 100 \
     --task_name mnli \
@@ -40,10 +39,11 @@ CUDA_VISIBLE_DEVICES=0 python glue.py \
     \
     --seed ${SEED} \
     --lr ${LR} \
-    --quant_block_size ${QUANT_BLOCK_SIZE} \
-    --ngrads ${NGRADS} \
-    --k ${DENSITY} \
+    --rank ${RANK} \
     \
+    --galore_svd_gap 200 \
+    --galore_use_ef 0 \
+    --quant_block_size 0 \
     --weight_decay 0 \
     --beta1 0.9 \
     --beta2 0.999 \

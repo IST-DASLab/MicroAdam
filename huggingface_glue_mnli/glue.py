@@ -599,21 +599,25 @@ def main():
     if custom_args.optimizer_name == 'sgd':
         logger.info("*** Using SGD optimizer ***")
         optim = SGD(param_groups, lr=custom_args.lr, momentum=custom_args.momentum)
-    elif custom_args.optimizer_name == 'adamtorch':
+    elif custom_args.optimizer_name == 'adamw':
         logger.info("*** Using PyTorch Adam optimizer ***")
-        optim = torch.optim.Adam(param_groups, lr=custom_args.lr)
+        optim = torch.optim.AdamW(param_groups,
+                                  lr=custom_args.lr,
+                                  betas=(custom_args.beta1, custom_args.beta2),
+                                  weight_decay=training_args.weight_decay,
+                                  eps=custom_args.eps)
     elif custom_args.optimizer_name == 'galoreadamwef':
         logger.info("*** Using GaLoreAdamWEF optimizer ***")
         optim = GaLoreAdamWEF(
             param_groups,
             lr=custom_args.lr,
-            use_ef=custom_args.galore_use_ef,
-            quant_block_size=custom_args.quant_block_size,
             rank=custom_args.galore_rank,
             svd_gap=custom_args.galore_svd_gap,
+            use_ef=custom_args.galore_use_ef,
+            quant_block_size=custom_args.quant_block_size,
+            weight_decay=training_args.weight_decay,
             beta1=custom_args.beta1,
             beta2=custom_args.beta2,
-            weight_decay=training_args.weight_decay,
             eps=custom_args.eps)
     elif custom_args.optimizer_name == 'microadam':
         optim = MicroAdam(
@@ -630,9 +634,9 @@ def main():
         optim = bnb.optim.AdamW8bit(
             param_groups,
             lr=custom_args.lr,
+            weight_decay=training_args.weight_decay,
             betas=(custom_args.beta1, custom_args.beta2),
             eps=custom_args.eps,
-            weight_decay=training_args.weight_decay,
             optim_bits=8)
     elif custom_args.optimizer_name == 'came':
         optim = CAME(
