@@ -86,3 +86,16 @@ Changes compared to the original `llm-foundry` repository:
 - [finetuning yaml file](https://github.com/IST-DASLab/MicroAdam/blob/main/llm-foundry/scripts/train/yamls/finetune/llama2-7b_microadam_gsm8k.yaml):
     * added `task` variable
     * added `wandb_groups` section
+
+## Citing
+If you find our work useful, please consider citing:
+```
+@misc{modoranu2024microadam,
+      title={MicroAdam: Accurate Adaptive Optimization with Low Space Overhead and Provable Convergence}, 
+      author={Ionut-Vlad Modoranu and Mher Safaryan and Grigory Malinovsky and Eldar Kurtic and Thomas Robert and Peter Richtarik and Dan Alistarh},
+      year={2024},
+      eprint={2405.15593},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
