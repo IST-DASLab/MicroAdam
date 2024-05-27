@@ -77,13 +77,13 @@ python3 train.py yamls/finetune/llama2-7b_microadam_gsm8k.yaml \
         seed=42
 ```
 
-Changes compared to the original `llm-foundry` repository:
+## Changes compared to the original `llm-foundry` repository:
 - [method `build_optimizer`](https://github.com/IST-DASLab/MicroAdam/blob/main/llm-foundry/llmfoundry/utils/builders.py#L373)
-- `llm-foundry/scripts/train/train.py:`
+- changes in `llm-foundry/scripts/train/train.py:`
     * set `run_name` and `save_folder` depending on wandb group, job_type and name
-    * added [evaluation]() and [time elapsed]() to be logged to wandb
-    * added wandb_groups_config to [finetuning yaml]()
-- [finetuning yaml file](https://github.com/IST-DASLab/MicroAdam/blob/main/llm-foundry/scripts/train/yamls/finetune/llama2-7b_microadam_gsm8k.yaml):
+    * added [evaluation](https://github.com/IST-DASLab/MicroAdam/blob/main/llm-foundry/scripts/train/evaluation.py) and [time elapsed](https://github.com/IST-DASLab/MicroAdam/blob/main/llm-foundry/scripts/train/train.py#L697) to be logged to wandb
+    * added wandb_groups_config to [finetuning yaml](https://github.com/IST-DASLab/MicroAdam/blob/main/llm-foundry/scripts/train/yamls/finetune/llama2-7b_microadam_gsm8k.yaml#L105)
+- changes in [finetuning yaml file](https://github.com/IST-DASLab/MicroAdam/blob/main/llm-foundry/scripts/train/yamls/finetune/llama2-7b_microadam_gsm8k.yaml):
     * added `task` variable
     * added `wandb_groups` section
 
