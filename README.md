@@ -15,7 +15,7 @@ pip3 install transformers bitsandbytes came-pytorch
 ## Usage
 We provide code to reproduce the following experiments:
 - BERT-Base/Large and OPT-1.3B using HuggingFace repository
-- **[TODO]** Llama-2 7B / GLUE-MNLI using `llm-foundry` from MosaicML
+- Llama-2 7B / GLUE-MNLI using [`llm-foundry` from MosaicML](https://github.com/mosaicml/llm-foundry)
 
 Please use our code from this repo because we modified the original repositories to ease `wandb`
 integration.
@@ -29,3 +29,60 @@ cd huggingface_glue_mnli
 OPTIM=microadam
 bash run_hf_glue_mnli_${OPTIM}.sh
 ```
+
+### Reproduce experiments for Llama-2 7B on GSM-8k
+We evaluate the model `lm-evaluation-harness` immediately after the training to log the results to wandb. We
+need to install the evaluation package at the commit specified below:
+
+```shell
+cd ~
+git clone git@github.com:EleutherAI/lm-evaluation-harness.git
+cd lm-evaluation-harness
+git checkout b281b0921b636bc36ad05c0b0b0763bd6dd43463
+pip install -e .
+```
+
+Now we can run the experiments using the following commands, supposing that we are located in
+`~/MicroAdam/llm-foundry/scripts/train`:
+
+#### Run MicroAdam
+```shell
+python3 train.py yamls/finetune/llama2-7b_microadam_gsm8k.yaml \
+        task=gsm8k \
+        optimizer.name=microadam \
+        optimizer.defaults.lr=4e-5 \
+        optimizer.microadam.m=10 \
+        optimizer.microadam.quant_block_size=64 \
+        save_folder=./llama2_7b_gsm8k_microadam \
+        seed=42
+```
+
+#### Run AdamW-8bit
+```shell
+python3 train.py yamls/finetune/llama2-7b_microadam_gsm8k.yaml \
+        task=gsm8k \
+        optimizer.name=adamw8b \
+        optimizer.defaults.lr=5e-5 \
+        save_folder=./llama2_7b_gsm8k_adamw8b \
+        seed=42
+```
+
+#### Run DecoupledAdamW
+```shell
+python3 train.py yamls/finetune/llama2-7b_microadam_gsm8k.yaml \
+        task=gsm8k \
+        optimizer.name=decoupled_adamw \
+        optimizer.defaults.lr=5e-5 \
+        save_folder=./llama2_7b_gsm8k_decoupled_adamw \
+        seed=42
+```
+
+Changes compared to the original `llm-foundry` repository:
+- [method `build_optimizer`](https://github.com/IST-DASLab/MicroAdam/blob/main/llm-foundry/llmfoundry/utils/builders.py#L373)
+- `llm-foundry/scripts/train/train.py:`
+    * set `run_name` and `save_folder` depending on wandb group, job_type and name
+    * added [evaluation]() and [time elapsed]() to be logged to wandb
+    * added wandb_groups_config to [finetuning yaml]()
+- [finetuning yaml file](https://github.com/IST-DASLab/MicroAdam/blob/main/llm-foundry/scripts/train/yamls/finetune/llama2-7b_microadam_gsm8k.yaml):
+    * added `task` variable
+    * added `wandb_groups` section

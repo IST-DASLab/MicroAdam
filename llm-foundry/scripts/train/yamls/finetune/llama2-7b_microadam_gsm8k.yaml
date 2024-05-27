@@ -9,7 +9,6 @@ seed: 42
 max_duration: 3ep
 eval_interval: 1ep
 eval_first: false
-task: # new, used for evaluation
 
 global_train_batch_size: 32
 device_train_microbatch_size: 1
@@ -88,17 +87,17 @@ optimizer:
         eps: 1.0e-8
         disable_grad: []
     decoupled_adamw: # will use defaults
-    microadam: # added by ionut: additional parameters for this particular optimizer
+    microadam: # additional parameters for this particular optimizer
         m: 10
         quant_block_size: 100000
         k_init: 0.01
-    adamw8b: # added by ionut: additional parameters for this particular optimizer
+    adamw8b: # additional parameters for this particular optimizer
         optim_bits: 8
 
 loggers:
-    wandb: # added by ionut: I added group to wandb
+    wandb: # added group to wandb
         entity:
-        project: ionut_cadam_llama2-7b_${task}
+        project: MicroAdam_llama2-7b_${task}
         job_type: lr=${optimizer.defaults.lr}_wd=${optimizer.defaults.weight_decay}
         name: seed=${seed}
         group: # TODO
@@ -109,14 +108,13 @@ wandb_groups:
     adamw8b:
         group: ${task}_${optimizer.name}_ep=${max_duration}_bs=${global_train_batch_size}_bits=${optimizer.adamw8b.optim_bits}
     microadam:
-        group: ${task}_${optimizer.name}_ep=${max_duration}_bs=${global_train_batch_size}_m=${optimizer.cadamcudalw.m}_k=${optimizer.cadamcudalw.k_init}_qbs=${optimizer.cadamcudalw.quant_block_size}
+        group: ${task}_${optimizer.name}_ep=${max_duration}_bs=${global_train_batch_size}_m=${optimizer.microadam.m}_k=${optimizer.microadam.k_init}_qbs=${optimizer.microadam.quant_block_size}
     galoreadamwef:
         group: ${task}_${optimizer.name}_ep=${max_duration}_bs=${global_train_batch_size}_ef=${optimizer.galoreadamwef.use_ef}_r=${optimizer.galoreadamwef.svd_gap}_qbs=${optimizer.galoreadamwef.quant_block_size}
-    galoreadamwef8b:
-        group: ${task}_${optimizer.name}_ep=${max_duration}_bs=${global_train_batch_size}_ef=${optimizer.galoreadamwef8b.use_ef}_r=${optimizer.galoreadamwef8b.svd_gap}_qbs=${optimizer.galoreadamwef8b.quant_block_size}
 
 # Checkpoint to local filesystem or remote object store
 save_interval: 1dur
 save_num_checkpoints_to_keep: 1  # Important, this cleans up checkpoints saved to DISK
 save_folder: /mnt/beegfs/alistgrp/imodoran/results/ # ${loggers.wandb.project}/${run_name}
 run_name: # ${loggers.wandb.group}_${loggers.wandb.job_type}_${loggers.wandb.name}
+task: # new, used for evaluation
