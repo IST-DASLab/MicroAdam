@@ -14,7 +14,7 @@ pip3 install ista-daslab-optimizers
 
 In addition, we need to install the following packages:
 ```shell
-pip3 install transformers bitsandbytes came-pytorch
+pip3 install transformers mosaicml bitsandbytes came-pytorch
 ```
 
 ## Usage
