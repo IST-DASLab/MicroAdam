@@ -27,6 +27,9 @@ integration.
 
 ### Installation
 ```shell
+cd ~
+git clone git@github.com:IST-DASLab/MicroAdam.git
+cd ~/MicroAdam
 source install.sh
 ```
 
