@@ -27,8 +27,7 @@ integration.
 
 ### Clone repository
 ```shell
-git clone git@github.com:IST-DASLab/MicroAdam.git
-cd MicroAdam
+cd ~ && git clone git@github.com:IST-DASLab/MicroAdam.git
 ```
 
 ### Reproduce experiments for GLUE/MNLI
@@ -36,9 +35,12 @@ We provide the scripts `run_hf_glue_mnli_OPTIM.sh`, where `OPTIM` is the optimiz
 `microadam`, `adamw`, `galore`, `came`, `adamw8b`.
 
 ```shell
-cd huggingface_glue_mnli
-OPTIM=microadam
-bash run_hf_glue_mnli_${OPTIM}.sh
+cd ~/MicroAdam/huggingface_glue_mnli
+# bash run_hf_glue_mnli_adamw.sh
+# bash run_hf_glue_mnli_adamw8b.sh
+# bash run_hf_glue_mnli_came.sh
+# bash run_hf_glue_mnli_galore.sh
+bash run_hf_glue_mnli_microadam.sh
 ```
 
 ### Reproduce experiments for Llama-2 7B on GSM-8k
@@ -58,14 +60,8 @@ Now we can run the experiments using the following commands, supposing that we a
 
 #### Run MicroAdam
 ```shell
-python3 train.py yamls/finetune/llama2-7b_microadam_gsm8k.yaml \
-        task=gsm8k \
-        optimizer.name=microadam \
-        optimizer.defaults.lr=4e-5 \
-        optimizer.microadam.m=10 \
-        optimizer.microadam.quant_block_size=64 \
-        save_folder=./llama2_7b_gsm8k_microadam \
-        seed=42
+cd ~/MicroAdam/llm-foundry/scripts/train
+bash run_llama2-7b_gsm8k_microadam.sh
 ```
 
 #### Run AdamW-8bit
