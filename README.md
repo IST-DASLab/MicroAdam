@@ -14,7 +14,7 @@ pip3 install ista-daslab-optimizers
 
 In addition, we need to install the following packages:
 ```shell
-pip3 install transformers mosaicml bitsandbytes came-pytorch
+pip3 install transformers mosaicml mosaicml-streaming bitsandbytes came-pytorch
 ```
 
 ## Usage
@@ -25,9 +25,9 @@ We provide code to reproduce the following experiments:
 Please use our code from this repo because we modified the original repositories to ease `wandb`
 integration.
 
-### Clone repository
+### Installation
 ```shell
-cd ~ && git clone git@github.com:IST-DASLab/MicroAdam.git
+source install.sh
 ```
 
 ### Reproduce experiments for GLUE/MNLI
@@ -44,19 +44,7 @@ bash run_hf_glue_mnli_microadam.sh
 ```
 
 ### Reproduce experiments for Llama-2 7B on GSM-8k
-We evaluate the model `lm-evaluation-harness` immediately after the training to log the results to wandb. We
-need to install the evaluation package at the commit specified below:
-
-```shell
-cd ~
-git clone git@github.com:EleutherAI/lm-evaluation-harness.git
-cd lm-evaluation-harness
-git checkout b281b0921b636bc36ad05c0b0b0763bd6dd43463
-pip install -e .
-```
-
-Now we can run the experiments using the following commands, supposing that we are located in
-`~/MicroAdam/llm-foundry/scripts/train`:
+We can run the experiments using the following commands:
 
 #### Run MicroAdam
 ```shell
