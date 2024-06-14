@@ -2,30 +2,11 @@
 This repository contains the code to reproduce the results for the paper [MicroAdam: Accurate 
 Adaptive Optimization with Low Space Overhead and Provable Convergence](https://arxiv.org/pdf/2405.15593).
 
-## Installation
-Follow the installation instructions from the 
-[ISTA-DASLab-Optimizers](https://github.com/IST-DASLab/ISTA-DASLab-Optimizers?tab=readme-ov-file#installation) 
-repository. You can choose whether you want a new environment or use your existing one.
-
-### Summary:
-```shell
-pip3 install ista-daslab-optimizers
-```
-
-In addition, we need to install the following packages:
-```shell
-pip3 install transformers mosaicml mosaicml-streaming bitsandbytes came-pytorch
-```
-
-## Usage
 We provide code to reproduce the following experiments:
 - BERT-Base/Large and OPT-1.3B on GLUE/MNLI using HuggingFace repository
 - Llama-2 7B on GSM8k using [`llm-foundry` from MosaicML](https://github.com/mosaicml/llm-foundry)
 
-Please use our code from this repo because we modified the original repositories to ease `wandb`
-integration.
-
-### Installation
+## Installation
 ```shell
 cd ~
 git clone git@github.com:IST-DASLab/MicroAdam.git
