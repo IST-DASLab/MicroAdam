@@ -15,5 +15,5 @@ cd ~/lm-evaluation-harness
 git checkout b281b0921b636bc36ad05c0b0b0763bd6dd43463
 pip install -e .
 
-cd ~/MicroAdam
+cd ~/MicroAdam/llm-foundry
 pip3 install -e ".[gpu]"
