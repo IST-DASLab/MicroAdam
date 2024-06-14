@@ -25,6 +25,12 @@ We provide code to reproduce the following experiments:
 Please use our code from this repo because we modified the original repositories to ease `wandb`
 integration.
 
+### Clone repository
+```shell
+git clone git@github.com:IST-DASLab/MicroAdam.git
+cd MicroAdam
+```
+
 ### Reproduce experiments for GLUE/MNLI
 We provide the scripts `run_hf_glue_mnli_OPTIM.sh`, where `OPTIM` is the optimizer name, as follows: 
 `microadam`, `adamw`, `galore`, `came`, `adamw8b`.
