@@ -6,10 +6,8 @@ import socket
 from torch import topk as TopK
 from torch.distributed import is_initialized, get_rank
 from galore_projector import GaLoreProjector
-from helpers import get_cuda_capability, import_correct_cuda_cadam, get_gpu_mem_usage, get_first_device, ModelBlockSplitter
-
-cuda_cadam = import_correct_cuda_cadam()
-
+from helpers import get_gpu_mem_usage, get_first_device, ModelBlockSplitter
+import ista_daslab_micro_adam
 
 class GaLoreAdamWEF(torch.optim.Optimizer):
     def __init__(self, params, lr, use_ef, quant_block_size, rank, svd_gap, scale=1, beta1=0.9, beta2=0.999, weight_decay=0, eps=1e-8):
@@ -145,7 +143,7 @@ class GaLoreAdamWEF(torch.optim.Optimizer):
             ##### STEP 1: g^d += Qinv(xi)
             if self.use_ef:
                 # acc = torch.zeros_like(grad_d)
-                cuda_cadam.asymm_block_quant_inv(d, self.quant_block_size, st['error'], st['min_vals'], st['max_vals'], grad_d)
+                ista_daslab_micro_adam.asymm_block_quant_inv(d, self.quant_block_size, st['error'], st['min_vals'], st['max_vals'], grad_d)
                 # txt = f'{txt} |a|={acc.norm(p=2)}'
                 # grad_d.add_(acc)
 
@@ -178,7 +176,7 @@ class GaLoreAdamWEF(torch.optim.Optimizer):
                     st['min_vals'][quant_full_blocks_count] = grad_d_flat[d_index_quant:].min()
                     st['max_vals'][quant_full_blocks_count] = grad_d_flat[d_index_quant:].max()
                     
-                cuda_cadam.asymm_block_quant(d, self.quant_block_size, st['error'], st['min_vals'], st['max_vals'], grad_d_flat)  # error = Q(a, min, max)
+                ista_daslab_micro_adam.asymm_block_quant(d, self.quant_block_size, st['error'], st['min_vals'], st['max_vals'], grad_d_flat)  # error = Q(a, min, max)
                 # txt = f'{txt} |e2|={st["error"].norm(p=2)}'
 
             ##### STEP 6:
@@ -222,7 +220,7 @@ class GaLoreAdamWEF(torch.optim.Optimizer):
         if self.steps % self.log_interval == 0:
             if should_apply_galore and self.use_ef:
                 grad_d.zero_()
-                cuda_cadam.asymm_block_quant_inv(d, self.quant_block_size, st['error'], st['min_vals'], st['max_vals'], grad_d)
+                ista_daslab_micro_adam.asymm_block_quant_inv(d, self.quant_block_size, st['error'], st['min_vals'], st['max_vals'], grad_d)
                 norm_e = grad_d.norm(p=2) ** 2
 
         return norm_g_d, norm_g_r, norm_u_d, norm_u_r, norm_e

@@ -53,7 +53,7 @@ import torch.nn as nn
 import bitsandbytes as bnb
 from ista_daslab_optimizers import MicroAdam
 from came_pytorch import CAME
-from galore_projector import GaLoreAdamWEF
+from galore_adamw_ef import GaLoreAdamWEF
 from args_nlp import CustomArgs
 from helpers import setup_wandb
 
