@@ -8,7 +8,7 @@ clear
 # Here, we suppose that these folders are present in the home directory denoted by ~
 export PROJECTS_ROOT=$(realpath ~)
 
-CUDA_VISIBLE_DEVICES=7 python3 train.py yamls/finetune/llama2-7b_microadam_gsm8k.yaml \
+CUDA_VISIBLE_DEVICES=0,1,2,3 python3 train.py yamls/finetune/llama2-7b_microadam_gsm8k.yaml \
         task=gsm8k \
         optimizer.name=microadam \
         optimizer.defaults.lr=4e-5 \
