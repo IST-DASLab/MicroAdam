@@ -4,12 +4,16 @@ import os
 # os.environ['LD_LIBRARY_PATH'] = '/nfs/scistore19/alistgrp/imodoran/miniconda3/envs/llm_foundry/lib/'
 
 import sys
-sys.path.append('/nfs/scistore19/alistgrp/imodoran/workplace/M-FAC_extensions')
-sys.path.append('/nfs/scistore19/alistgrp/imodoran/workplace/M-FAC_extensions/llm-foundry')
-sys.path.append('/nfs/scistore19/alistgrp/imodoran/workplace/M-FAC_extensions/lm-evaluation-harness')
 
-from helpers.tools import experiment_mark_finished, experiment_continue_or_exit, get_gpu_mem_usage
-from evaluation import evaluate_model
+USER_HOME = os.path.expanduser('~')
+
+PATH_LIB_LLM_FOUNDRY = os.path.join(USER_HOME, 'MicroAdam', 'llm-foundry', 'llmfoundry')
+PATH_LM_EVAL_HARNESS = os.path.join(USER_HOME, 'lm-evaluation-harness')
+
+sys.path.append(PATH_LIB_LLM_FOUNDRY)
+sys.path.append(PATH_LM_EVAL_HARNESS)
+
+from evaluation import evaluate_model # this is from PATH_LM_EVAL_HARNESS
 
 import copy
 import gc
