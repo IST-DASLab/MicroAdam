@@ -409,8 +409,6 @@ def build_optimizer(model: torch.nn.Module, name: str,
     elif name == 'adamw8b':
         return bnb.optim.AdamW8bit(params, **cfg)
     elif name == 'microadam':
-        cfg['beta1'], cfg['beta2'] = cfg['betas']
-        del cfg['betas']
         return MicroAdam(params, **cfg)
     elif name in ['galoreadamwef', 'galoreadamwef8b']:
         cfg['beta1'], cfg['beta2'] = cfg['betas']
