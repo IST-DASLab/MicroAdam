@@ -13,6 +13,7 @@ WANDB_NAME=${OPTIMIZER}
 
 SEED=42
 LR=4e-5 # use --lr to set learning rate and let learning_rate set to 1e-4 (the last one will be ignored)
+RANK=256
 
 CUDA_VISIBLE_DEVICES=0 python glue.py \
     --num_train_epochs 3 \
@@ -41,10 +42,10 @@ CUDA_VISIBLE_DEVICES=0 python glue.py \
     \
     --seed ${SEED} \
     --lr ${LR} \
-    --rank ${RANK} \
     \
     --galore_svd_gap 200 \
     --galore_use_ef 0 \
+    --galore_rank ${RANK} \
     --quant_block_size 0 \
     --weight_decay 0 \
     --beta1 0.9 \
