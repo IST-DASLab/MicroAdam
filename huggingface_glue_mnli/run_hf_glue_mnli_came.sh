@@ -41,7 +41,6 @@ CUDA_VISIBLE_DEVICES=0 python glue.py \
     \
     --seed ${SEED} \
     --lr ${LR} \
-    --quant_block_size ${QUANT_BLOCK_SIZE} \
     --ngrads ${NGRADS} \
     --k ${DENSITY} \
     \
