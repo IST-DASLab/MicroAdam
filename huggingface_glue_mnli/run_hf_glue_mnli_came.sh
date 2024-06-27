@@ -41,7 +41,5 @@ CUDA_VISIBLE_DEVICES=0 python glue.py \
     \
     --seed ${SEED} \
     --lr ${LR} \
-    --ngrads ${NGRADS} \
-    --k ${DENSITY} \
     \
     --weight_decay 0
