@@ -5,10 +5,13 @@ import os
 
 import sys
 
-USER_HOME = os.path.expanduser('~')
+PROJECTS_ROOT = os.environ.get('PROJECTS_ROOT', None)
+if PROJECTS_ROOT is None or not os.path.isdir(PROJECTS_ROOT):
+    print(f'Please set PROJECTS_ROOT environment variable')
+    sys.exit(666)
 
-PATH_LIB_LLM_FOUNDRY = os.path.join(USER_HOME, 'MicroAdam', 'llm-foundry', 'llmfoundry')
-PATH_LM_EVAL_HARNESS = os.path.join(USER_HOME, 'lm-evaluation-harness')
+PATH_LIB_LLM_FOUNDRY = os.path.join(PROJECTS_ROOT, 'MicroAdam', 'llm-foundry', 'llmfoundry')
+PATH_LM_EVAL_HARNESS = os.path.join(PROJECTS_ROOT, 'lm-evaluation-harness')
 
 sys.path.append(PATH_LIB_LLM_FOUNDRY)
 sys.path.append(PATH_LM_EVAL_HARNESS)
