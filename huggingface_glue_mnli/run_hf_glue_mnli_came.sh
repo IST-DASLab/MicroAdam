@@ -2,6 +2,8 @@ clear
 MODEL=bert-base # bert-base OR bert-large OR opt-1.3b
 OUTPUT_DIR=./results_hf_glue_mnli
 
+mkdir -p $OUTPUT_DIR
+
 OPTIMIZER=came
 
 WANDB_PROJECT=microadam
