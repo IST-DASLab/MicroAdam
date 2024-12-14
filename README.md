@@ -7,6 +7,8 @@ We provide code to reproduce the following experiments:
 - Llama-2 7B on GSM8k using [`llm-foundry` from MosaicML](https://github.com/mosaicml/llm-foundry)
 
 ## Installation
+`MicroAdam` optimizer is implemented in the [`ISTA-DASLab-Optimizers`](https://github.com/IST-DASLab/ISTA-DASLab-Optimizers) repository, along with other optimizers. It is installable via `pip install ista-daslab-optimizers` (automatically done in the `install.sh` script). Follow the steps below to setup the environment for MicroAdam:
+
 ```shell
 cd ~
 git clone git@github.com:IST-DASLab/MicroAdam.git
